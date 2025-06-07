@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אוצר מילים יומי</title>
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiYXXXei3Vk5iBBHdGIq7Vk5-Vk5iBBHdGIq7Vk5-Vk5iBBHdGIq7Vk5+Vk5iBBHdGIqrbmFtZSI6IkRhaWx5IFZvY2FiIiwic2hvcnRfbmFtZSI6IlZvY2FiIiwic3RhcnRfdXJsIjoiLyIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmZmZmZmYiLCJ0aGVtZV9jb2xvciI6IiM0Mjg1ZjQiLCJpY29ucyI6W119">
+    <meta name="theme-color" content="#4285f4">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4285f4;
+            margin-bottom: 10px;
+        }
+
+        .date {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .word-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border-right: 4px solid #4285f4;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .word-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .word-number {
+            background: #4285f4;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .english-word {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .field {
+            margin-bottom: 10px;
+            padding: 8px 0;
+        }
+
+        .field-label {
+            font-weight: bold;
+            color: #4285f4;
+            margin-left: 8px;
+        }
+
+        .field-content {
+            color: #555;
+            margin-top: 5px;
+        }
+
+        .hebrew {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .pronunciation {
+            font-style: italic;
+            color: #e74c3c;
+        }
+
+        .example {
+            font-style: italic;
+            color: #27ae60;
+            line-height: 1.4;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-right: 4px solid #c33;
+        }
+
+        .refresh-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            transition: background 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background: #3367d6;
+        }
+
+        .status {
+            text-align: center;
+            color: #27ae60;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            .title {
+                font-size: 1.6rem;
+            }
+            
+            .english-word {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">אוצר מילים יומי</h1>
+            <div class="date" id="currentDate"></div>
+        </div>
+
+        <div id="content">
+            <div class="loading">טוען מילים...</div>
+        </div>
+
+        <button class="refresh-btn" onclick="loadWords(true)">רענן מילים</button>
+    </div>
+
+    <script>
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1uFypL_pbx5rGrcqzT-GvqCdz6TyXxlBSR-dOtPgQoAo/export?format=csv&gid=986656386';
+        const NUM_WORDS_PER_DAY = 5;
+        const CACHE_KEY = 'daily_words_cache';
+
+        // Set current date
+        document.getElementById('currentDate').textContent = 
+            `תאריך: ${new Date().toLocaleDateString('he-IL')}`;
+
+        function isValidWord(word) {
+            const requiredFields = ['English', 'Hebrew', 'Pronunciation', 'Example'];
+            return requiredFields.every(field => {
+                const value = word[field];
+                if (!value) return false;
+                const valueStr = String(value).trim();
+                if (valueStr === '' || valueStr.toLowerCase() === 'nan') return false;
+                return true;
+            });
+        }
+
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            const words = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(current.trim().replace(/"/g, ''));
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                values.push(current.trim().replace(/"/g, ''));
+
+                const word = {};
+                headers.forEach((header, index) => {
+                    word[header] = values[index] || '';
+                });
+
+                if (isValidWord(word)) {
+                    words.push(word);
+                }
+            }
+            return words;
+        }
+
+        async function fetchWords() {
+            try {
+                const response = await fetch(SHEET_URL);
+                if (!response.ok) throw new Error('Failed to fetch data');
+                
+                const text = await response.text();
+                const allWords = parseCSV(text);
+                
+                if (allWords.length < NUM_WORDS_PER_DAY) {
+                    throw new Error(`Not enough valid words. Found ${allWords.length}, need ${NUM_WORDS_PER_DAY}`);
+                }
+
+                // Select random words
+                const selectedWords = [];
+                const usedIndices = new Set();
+                
+                while (selectedWords.length < NUM_WORDS_PER_DAY) {
+                    const randomIndex = Math.floor(Math.random() * allWords.length);
+                    if (!usedIndices.has(randomIndex)) {
+                        usedIndices.add(randomIndex);
+                        selectedWords.push(allWords[randomIndex]);
+                    }
+                }
+
+                return selectedWords;
+            } catch (error) {
+                throw new Error(`Error loading words: ${error.message}`);
+            }
+        }
+
+        function getCachedWords() {
+            const cached = localStorage.getItem(CACHE_KEY);
+            if (!cached) return null;
+
+            try {
+                const data = JSON.parse(cached);
+                const today = new Date().toDateString();
+                if (data.date === today && data.words && data.words.length > 0) {
+                    return data.words;
+                }
+            } catch (e) {
+                console.error('Error parsing cached data:', e);
+            }
+            return null;
+        }
+
+        function cacheWords(words) {
+            const data = {
+                date: new Date().toDateString(),
+                words: words
+            };
+            localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+        }
+
+        function displayWords(words) {
+            const content = document.getElementById('content');
+            let html = '';
+
+            words.forEach((word, index) => {
+                html += `
+                    <div class="word-card">
+                        <div class="word-number">${index + 1}</div>
+                        <div class="english-word">${word.English}</div>
+                        
+                        <div class="field">
+                            <span class="field-label">תרגום:</span>
+                            <div class="field-content hebrew">${word.Hebrew}</div>
+                        </div>
+                        
+                        <div class="field">
+                            <span class="field-label">הגייה:</span>
+                            <div class="field-content pronunciation">${word.Pronunciation}</div>
+                        </div>
+                        
+                        <div class="field">
+                            <span class="field-label">דוגמה:</span>
+                            <div class="field-content example">${word.Example}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `<div class="status">נטענו ${words.length} מילים בהצלחה</div>`;
+            content.innerHTML = html;
+        }
+
+        function displayError(message) {
+            const content = document.getElementById('content');
+            content.innerHTML = `<div class="error">שגיאה: ${message}</div>`;
+        }
+
+        async function loadWords(forceRefresh = false) {
+            const content = document.getElementById('content');
+            content.innerHTML = '<div class="loading">טוען מילים...</div>';
+
+            try {
+                let words = null;
+                
+                if (!forceRefresh) {
+                    words = getCachedWords();
+                }
+
+                if (!words) {
+                    words = await fetchWords();
+                    cacheWords(words);
+                }
+
+                displayWords(words);
+            } catch (error) {
+                console.error('Error:', error);
+                displayError(error.message);
+            }
+        }
+
+        // Install PWA prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            deferredPrompt = e;
+            // You can show custom install button here
+        });
+
+        // Load words on page load
+        loadWords();
+
+        // Register service worker for offline support
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZnVuY3Rpb24oZXZlbnQpIHsKICBjb25zb2xlLmxvZygnU2VydmljZSB3b3JrZXIgaW5zdGFsbGVkJyk7Cn0pOwoKc2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGZ1bmN0aW9uKGV2ZW50KSB7CiAgZXZlbnQucmVzcG9uZFdpdGgoCiAgICBjYWNoZXMubWF0Y2goZXZlbnQucmVxdWVzdCkKICAgICAgLnRoZW4oZnVuY3Rpb24ocmVzcG9uc2UpIHsKICAgICAgICByZXR1cm4gcmVzcG9uc2UgfHwgZmV0Y2goZXZlbnQucmVxdWVzdCk7CiAgICAgIH0pCiAgKTsKfSk7');
+        }
+    </script>
+</body>
+</html>
