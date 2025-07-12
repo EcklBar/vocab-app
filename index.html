@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אוצר מילים יומי</title>
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiYXXXei3Vk5iBBHdGIq7Vk5-Vk5iBBHdGIq7Vk5-Vk5iBBHdGIq7Vk5+Vk5iBBHdGIqrbmFtZSI6IkRhaWx5IFZvY2FiIiwic2hvcnRfbmFtZSI6IlZvY2FiIiwic3RhcnRfdXJsIjoiLyIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmZmZmZmYiLCJ0aGVtZV9jb2xvciI6IiM0Mjg1ZjQiLCJpY29ucyI6W119">
+    <meta name="theme-color" content="#4285f4">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4285f4;
+            margin-bottom: 10px;
+        }
+
+        .date {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 5px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            border: none;
+            background: transparent;
+            color: #666;
+        }
+
+        .tab.active {
+            background: #4285f4;
+            color: white;
+            box-shadow: 0 2px 10px rgba(66, 133, 244, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .word-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border-right: 4px solid #4285f4;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .word-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .word-card.difficult {
+            border-right-color: #e74c3c;
+            background: linear-gradient(to left, rgba(231, 76, 60, 0.05), white);
+        }
+
+        .word-number {
+            background: #4285f4;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .english-word {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .word-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .word-actions {
+            display: flex;
+            gap: 10px;
+            margin-right: auto;
+        }
+
+        .play-button {
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .play-button:hover {
+            background: #219a52;
+            transform: scale(1.1);
+        }
+
+        .play-button:active {
+            transform: scale(0.95);
+        }
+
+        .difficult-button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .difficult-button:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+
+        .difficult-button.saved {
+            background: #f39c12;
+        }
+
+        .difficult-button.saved:hover {
+            background: #e67e22;
+        }
+
+        .remove-button {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .remove-button:hover {
+            background: #7f8c8d;
+            transform: scale(1.1);
+        }
+
+        .field {
+            margin-bottom: 10px;
+            padding: 8px 0;
+        }
+
+        .field-label {
+            font-weight: bold;
+            color: #4285f4;
+            margin-left: 8px;
+        }
+
+        .field-content {
+            color: #555;
+            margin-top: 5px;
+        }
+
+        .hebrew {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .pronunciation {
+            font-style: italic;
+            color: #e74c3c;
+        }
+
+        .example {
+            font-style: italic;
+            color: #27ae60;
+            line-height: 1.4;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .translation-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .show-translation-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            white-space: nowrap;
+        }
+
+        .show-translation-btn:hover {
+            background: #3367d6;
+            transform: scale(1.05);
+        }
+
+        .show-translation-btn:active {
+            transform: scale(0.95);
+        }
+
+        .hidden-translation {
+            display: none;
+        }
+
+        .visible-translation {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-right: 4px solid #c33;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .empty-state h3 {
+            color: #4285f4;
+            margin-bottom: 10px;
+        }
+
+        .refresh-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: background 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background: #3367d6;
+        }
+
+        .clear-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: background 0.3s;
+        }
+
+        .clear-btn:hover {
+            background: #c0392b;
+        }
+
+        .button-group {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .status {
+            text-align: center;
+            color: #27ae60;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        .difficult-count {
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* Responsive design */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            .title {
+                font-size: 1.6rem;
+            }
+            
+            .english-word {
+                font-size: 1.2rem;
+            }
+
+            .tabs {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .word-actions {
+                gap: 5px;
+            }
+
+            .play-button, .difficult-button, .remove-button {
+                width: 30px;
+                height: 30px;
+                font-size: 0.9rem;
+            }
+
+            .show-translation-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">אוצר מילים יומי</h1>
+            <div class="date" id="currentDate"></div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('daily')">מילים יומיות</button>
+            <button class="tab" onclick="switchTab('difficult')">
+                מילים קשות 
+                <span class="difficult-count" id="difficultCount">0</span>
+            </button>
+        </div>
+
+        <div id="dailyTab" class="tab-content active">
+            <div id="dailyContent">
+                <div class="loading">טוען מילים...</div>
+            </div>
+            <div class="button-group">
+                <button class="refresh-btn" onclick="loadWords(true)">רענן מילים</button>
+            </div>
+        </div>
+
+        <div id="difficultTab" class="tab-content">
+            <div id="difficultContent">
+                <div class="empty-state">
+                    <h3>אין מילים קשות</h3>
+                    <p>הוסף מילים קשות מהמילים היומיות כדי לתרגל אותן כאן</p>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="clear-btn" onclick="clearDifficultWords()">נקה מילים קשות</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1uFypL_pbx5rGrcqzT-GvqCdz6TyXxlBSR-dOtPgQoAo/export?format=csv&gid=986656386';
+        const NUM_WORDS_PER_DAY = 5;
+        const CACHE_KEY = 'daily_words_cache';
+        const DIFFICULT_WORDS_KEY = 'difficult_words';
+
+        let currentTab = 'daily';
+        let currentWords = [];
+        let difficultWords = [];
+
+        // Set current date
+        document.getElementById('currentDate').textContent = 
+            `תאריך: ${new Date().toLocaleDateString('he-IL')}`;
+
+        // Initialize
+        loadDifficultWords();
+        updateDifficultCount();
+
+        // Tab switching
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            if (tab === 'daily') {
+                document.querySelector('.tab:first-child').classList.add('active');
+                document.getElementById('dailyTab').classList.add('active');
+            } else {
+                document.querySelector('.tab:last-child').classList.add('active');
+                document.getElementById('difficultTab').classList.add('active');
+                displayDifficultWords();
+            }
+        }
+
+        // Text-to-speech function
+        function speakWord(word) {
+            if ('speechSynthesis' in window) {
+                speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.8;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+                
+                speechSynthesis.speak(utterance);
+            } else {
+                alert('הדפדפן שלך לא תומך בהקראה');
+            }
+        }
+
+        // Translation toggle function
+        function toggleTranslation(wordIndex, tabType = 'daily') {
+            const translationElement = document.getElementById(`translation-${tabType}-${wordIndex}`);
+            const buttonElement = document.getElementById(`btn-${tabType}-${wordIndex}`);
+            
+            if (translationElement.classList.contains('hidden-translation')) {
+                translationElement.classList.remove('hidden-translation');
+                translationElement.classList.add('visible-translation');
+                buttonElement.textContent = 'הסתר תרגום';
+                buttonElement.style.background = '#e74c3c';
+            } else {
+                translationElement.classList.remove('visible-translation');
+                translationElement.classList.add('hidden-translation');
+                buttonElement.textContent = 'הצג תרגום';
+                buttonElement.style.background = '#4285f4';
+            }
+        }
+
+        // Difficult words management
+        function loadDifficultWords() {
+            const saved = JSON.parse(localStorage?.getItem(DIFFICULT_WORDS_KEY) || '[]');
+            difficultWords = saved;
+        }
+
+        function saveDifficultWords() {
+            if (localStorage) {
+                localStorage.setItem(DIFFICULT_WORDS_KEY, JSON.stringify(difficultWords));
+            }
+        }
+
+        function addToDifficult(word) {
+            const exists = difficultWords.some(w => w.English === word.English);
+            if (!exists) {
+                difficultWords.push({...word, addedDate: new Date().toISOString()});
+                saveDifficultWords();
+                updateDifficultCount();
+                
+                // Visual feedback
+                const button = document.querySelector(`[onclick="addToDifficult('${word.English}')"]`);
+                if (button) {
+                    button.classList.add('saved');
+                    button.innerHTML = '★';
+                    button.title = 'נשמר במילים קשות';
+                }
+            }
+        }
+
+        function removeFromDifficult(englishWord) {
+            difficultWords = difficultWords.filter(w => w.English !== englishWord);
+            saveDifficultWords();
+            updateDifficultCount();
+            displayDifficultWords();
+        }
+
+        function clearDifficultWords() {
+            if (confirm('האם אתה בטוח שברצונך למחוק את כל המילים הקשות?')) {
+                difficultWords = [];
+                saveDifficultWords();
+                updateDifficultCount();
+                displayDifficultWords();
+            }
+        }
+
+        function updateDifficultCount() {
+            document.getElementById('difficultCount').textContent = difficultWords.length;
+        }
+
+        function isDifficultWord(englishWord) {
+            return difficultWords.some(w => w.English === englishWord);
+        }
+
+        // Display functions
+        function displayDifficultWords() {
+            const content = document.getElementById('difficultContent');
+            
+            if (difficultWords.length === 0) {
+                content.innerHTML = `
+                    <div class="empty-state">
+                        <h3>אין מילים קשות</h3>
+                        <p>הוסף מילים קשות מהמילים היומיות כדי לתרגל אותן כאן</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            difficultWords.forEach((word, index) => {
+                html += `
+                    <div class="word-card difficult">
+                        <div class="word-header">
+                            <div class="word-number">${index + 1}</div>
+                            <div class="english-word">${word.English}</div>
+                            <div class="word-actions">
+                                <button class="play-button" onclick="speakWord('${word.English}')" title="הקרא את המילה">🔊</button>
+                                <button class="remove-button" onclick="removeFromDifficult('${word.English}')" title="הסר מהמילים הקשות">🗑️</button>
+                            </div>
+                        </div>
+                        
+                        <div class="field">
+                            <span class="field-label">תרגום:</span>
+                            <div class="translation-container">
+                                <button class="show-translation-btn" id="btn-difficult-${index}" onclick="toggleTranslation(${index}, 'difficult')">הצג תרגום</button>
+                                <div class="field-content hebrew hidden-translation" id="translation-difficult-${index}">${word.Hebrew}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="field">
+                            <span class="field-label">הגייה:</span>
+                            <div class="field-content pronunciation">${word.Pronunciation}</div>
+                        </div>
+                        
+                        <div class="field">
+                            <span class="field-label">דוגמה:</span>
+                            <div class="field-content example">${word.Example}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `<div class="status">נמצאות ${difficultWords.length} מילים קשות</div>`;
+            content.innerHTML = html;
+        }
+
+        function isValidWord(word) {
+            const requiredFields = ['English', 'Hebrew', 'Pronunciation', 'Example'];
+            return requiredFields.every(field => {
+                const value = word[field];
+                if (!value) return false;
+                const valueStr = String(value).trim();
+                if (valueStr === '' || valueStr.toLowerCase() === 'nan') return false;
+                return true;
+            });
+        }
+
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            const words = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(current.trim().replace(/"/g, ''));
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                values.push(current.trim().replace(/"/g, ''));
+
+                const word = {};
+                headers.forEach((header, index) => {
+                    word[header] = values[index] || '';
+                });
+
+                if (isValidWord(word)) {
+                    words.push(word);
+                }
+            }
+            return words;
+        }
+
+        async function fetchWords() {
+            try {
+                const response = await fetch(SHEET_URL);
+                if (!response.ok) throw new Error('Failed to fetch data');
+                
+                const text = await response.text();
+                const allWords = parseCSV(text);
+                
+                if (allWords.length < NUM_WORDS_PER_DAY) {
+                    throw new Error(`Not enough valid words. Found ${allWords.length}, need ${NUM_WORDS_PER_DAY}`);
+                }
+
+                const selectedWords = [];
+                const usedIndices = new Set();
+                
+                while (selectedWords.length < NUM_WORDS_PER_DAY) {
+                    const randomIndex = Math.floor(Math.random() * allWords.length);
+                    if (!usedIndices.has(randomIndex)) {
+                        usedIndices.add(randomIndex);
+                        selectedWords.push(allWords[randomIndex]);
+                    }
+                }
+
+                return selectedWords;
+            } catch (error) {
+                throw new Error(`Error loading words: ${error.message}`);
+            }
+        }
+
+        function getCachedWords() {
+            if (!localStorage) return null;
+            
+            const cached = localStorage.getItem(CACHE_KEY);
+            if (!cached) return null;
+
+            try {
+                const data = JSON.parse(cached);
+                const today = new Date().toDateString();
+                if (data.date === today && data.words && data.words.length > 0) {
+                    return data.words;
+                }
+            } catch (e) {
+                console.error('Error parsing cached data:', e);
+            }
+            return null;
+        }
+
+        function cacheWords(words) {
+            if (!localStorage) return;
+            
+            const data = {
+                date: new Date().toDateString(),
+                words: words
+            };
+            localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+        }
+
+        function displayWords(words) {
+            const content = document.getElementById('dailyContent');
+            let html = '';
+
+            currentWords = words;
+
+            words.forEach((word, index) => {
+                const isAlreadyDifficult = isDifficultWord(word.English);
+                const difficultButtonClass = isAlreadyDifficult ? 'saved' : '';
+                const difficultButtonIcon = isAlreadyDifficult ? '★' : '⚠️';
+                const difficultButtonTitle = isAlreadyDifficult ? 'נשמר במילים קשות' : 'הוסף למילים קשות';
+
+                html += `
+                    <div class="word-card">
+                        <div class="word-header">
+                            <div class="word-number">${index + 1}</div>
+                            <div class="english-word">${word.English}</div>
+                            <div class="word-actions">
+                                <button class="play-button" onclick="speakWord('${word.English}')" title="הקרא את המילה">🔊</button>
+                                <button class="difficult-button ${difficultButtonClass}" onclick="addToDifficult(currentWords[${index}])" title="${difficultButtonTitle}">${difficultButtonIcon}</button>
+                            </div>
+                        </div>
+                        
+                        <div class="field">
+                            <span class="field-label">תרגום:</span>
+                            <div class="translation-container">
+                                <button class="show-translation-btn" id="btn-daily-${index}" onclick="toggleTranslation(${index}, 'daily')">הצג תרגום</button>
+                                <div class="field-content hebrew hidden-translation" id="translation-daily-${index}">${word.Hebrew}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="field">
+                            <span class="field-label">הגייה:</span>
+                            <div class="field-content pronunciation">${word.Pronunciation}</div>
+                        </div>
+                        
+                        <div class="field">
+                            <span class="field-label">דוגמה:</span>
+                            <div class="field-content example">${word.Example}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `<div class="status">נטענו ${words.length} מילים בהצלחה</div>`;
+            content.innerHTML = html;
+        }
+
+        function displayError(message) {
+            const content = document.getElementById('dailyContent');
+            content.innerHTML = `<div class="error">שגיאה: ${message}</div>`;
+        }
+
+        async function loadWords(forceRefresh = false) {
+            const content = document.getElementById('dailyContent');
+            content.innerHTML = '<div class="loading">טוען מילים...</div>';
+
+            try {
+                let words = null;
+                
+                if (!forceRefresh) {
+                    words = getCachedWords();
+                }
+
+                if (!words) {
+                    words = await fetchWords();
+                    cacheWords(words);
+                }
+
+                displayWords(words);
+            } catch (error) {
+                console.error('Error:', error);
+                displayError(error.message);
+            }
+        }
+
+        // Load words on page load
+        loadWords();
+
+        // Register service worker for offline support
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZnVuY3Rpb24oZXZlbnQpIHsKICBjb25zb2xlLmxvZygnU2VydmljZSB3b3JrZXIgaW5zdGFsbGVkJyk7Cn0pOwoKc2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGZ1bmN0aW9uKGV2ZW50KSB7CiAgZXZlbnQucmVzcG9uZFdpdGgoCiAgICBjYWNoZXMubWF0Y2goZXZlbnQucmVxdWVzdCkKICAgICAgLnRoZW4oZnVuY3Rpb24ocmVzcG9uc2UpIHsKICAgICAgICByZXR1cm4gcmVzcG9uc2UgfHwgZmV0Y2goZXZlbnQucmVxdWVzdCk7CiAgICAgIH0pCiAgKTsKfSk7');
+        }
+    </script>
+</body>
+</html>
