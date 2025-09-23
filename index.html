@@ -238,6 +238,14 @@
             color: #e74c3c;
         }
 
+        .definition {
+            font-style: italic;
+            color: #8e44ad;
+            line-height: 1.4;
+            direction: ltr;
+            text-align: left;
+        }
+
         .example {
             font-style: italic;
             color: #27ae60;
@@ -613,6 +621,13 @@
                             <div class="field-content pronunciation">${word.Pronunciation}</div>
                         </div>
                         
+                        ${word.Definition ? `
+                        <div class="field">
+                            <span class="field-label">הגדרה באנגלית:</span>
+                            <div class="field-content definition">${word.Definition}</div>
+                        </div>
+                        ` : ''}
+                        
                         <div class="field">
                             <span class="field-label">דוגמה:</span>
                             <div class="field-content example">${word.Example}</div>
@@ -766,6 +781,13 @@
                             <span class="field-label">הגייה:</span>
                             <div class="field-content pronunciation">${word.Pronunciation}</div>
                         </div>
+                        
+                        ${word.Definition ? `
+                        <div class="field">
+                            <span class="field-label">הגדרה באנגלית:</span>
+                            <div class="field-content definition">${word.Definition}</div>
+                        </div>
+                        ` : ''}
                         
                         <div class="field">
                             <span class="field-label">דוגמה:</span>
